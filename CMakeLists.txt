@@ -390,8 +390,8 @@ target_sources(basalt
 )
 
 target_link_libraries(basalt
-  PUBLIC ${STD_CXX_FS} basalt::opencv basalt::basalt-headers TBB::tbb
-  PRIVATE magic_enum::magic_enum apriltag opengv nlohmann_json::nlohmann_json fmt::fmt)
+  PUBLIC ${STD_CXX_FS} basalt::basalt-headers TBB::tbb
+  PRIVATE basalt::opencv magic_enum::magic_enum apriltag opengv nlohmann_json::nlohmann_json fmt::fmt)
 target_include_directories(basalt PUBLIC "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>$<INSTALL_INTERFACE:include>")
 target_compile_definitions(basalt PUBLIC ${BASALT_COMPILE_DEFINITIONS})
 #target_compile_definitions(basalt PUBLIC BASALT_DISABLE_ASSERTS)
