@@ -462,9 +462,6 @@ install(FILES ${CONFIG_FILES}
   DESTINATION ${CMAKE_INSTALL_PREFIX}/etc/basalt)
 
 
-# Replace install() to do-nothing macro.
-macro(install)
-endmacro()
 # Include subproject (or any other CMake code) with "disabled" install().
 enable_testing()
 add_subdirectory(thirdparty/basalt-headers/test)
