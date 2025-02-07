@@ -4,10 +4,6 @@ project(basalt)
 
 set(CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake_modules/" ${CMAKE_MODULE_PATH})
 
-if(NOT EIGEN_ROOT)
-  set(EIGEN_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/basalt-headers/thirdparty/eigen")
-endif()
-
 string(TOLOWER "${PROJECT_NAME}" PROJECT_NAME_LOWERCASE)
 find_program(DPKG_PROGRAM dpkg DOC "dpkg program of Debian-based systems")
 if(DPKG_PROGRAM)
@@ -259,12 +255,8 @@ endif()
 set(CMAKE_CXX_FLAGS "${BASALT_CXX_FLAGS} ${BASALT_MARCH_FLAGS} ${BASALT_PASSED_CXX_FLAGS}")
 
 
-set(EIGEN_INCLUDE_DIR_HINTS ${EIGEN_ROOT})
-find_package(Eigen3 3.4.0 EXACT REQUIRED MODULE)
+find_package(Eigen3 3.4.0 EXACT REQUIRED NO_MODULE)
 message(STATUS "Found Eigen headers in: ${EIGEN3_INCLUDE_DIR}")
-if(NOT EIGEN3_INCLUDE_DIR MATCHES "^${EIGEN_ROOT}")
-  message(WARNING "Found Eigen headers are outside of specified EIGEN_ROOT '${EIGEN_ROOT}'")
-endif()
 
 find_package(TBB REQUIRED)
 message(STATUS "Found TBB ${TBB_VERSION_MAJOR}.${TBB_VERSION_MINOR} (interface version ${TBB_INTERFACE_VERSION}) headers in: ${TBB_INCLUDE_DIRS}")
@@ -290,13 +282,10 @@ set(BASALT_PANGO_TARGETS pango_display pango_image pango_windowing pango_plot pa
 
 add_subdirectory(thirdparty)
 
-# custom scoped cli11 target
-add_library(basalt::cli11 INTERFACE IMPORTED)
-set_property(TARGET basalt::cli11 PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/CLI11/include)
-
-# custom scoped magic_enum target
-add_library(basalt::magic_enum INTERFACE IMPORTED)
-set_property(TARGET basalt::magic_enum PROPERTY INTERFACE_INCLUDE_DIRECTORIES ${CMAKE_CURRENT_SOURCE_DIR}/thirdparty/magic_enum/include)
+find_package(nlohmann_json REQUIRED)
+find_package(Pangolin REQUIRED)
+find_package(CLI11 REQUIRED)
+find_package(magic_enum REQUIRED)
 
 # main library
 add_library(basalt SHARED)
@@ -316,7 +305,6 @@ target_sources(basalt
     ${CMAKE_CURRENT_SOURCE_DIR}/include/basalt/io/dataset_io.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/basalt/io/dataset_io_euroc.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/basalt/io/dataset_io_kitti.h
-    ${CMAKE_CURRENT_SOURCE_DIR}/include/basalt/io/dataset_io_rosbag.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/basalt/io/dataset_io_uzh.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/basalt/io/marg_data_io.h
     ${CMAKE_CURRENT_SOURCE_DIR}/include/basalt/linearization/block_diagonal.hpp
@@ -393,53 +381,53 @@ target_sources(basalt
 
 target_link_libraries(basalt
   PUBLIC ${STD_CXX_FS} basalt::opencv basalt::basalt-headers TBB::tbb
-  PRIVATE basalt::magic_enum rosbag apriltag opengv nlohmann::json fmt::fmt)
+  PRIVATE magic_enum::magic_enum apriltag opengv nlohmann_json::nlohmann_json fmt::fmt)
 target_include_directories(basalt PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_compile_definitions(basalt PUBLIC ${BASALT_COMPILE_DEFINITIONS})
 #target_compile_definitions(basalt PUBLIC BASALT_DISABLE_ASSERTS)
 
 add_executable(basalt_calibrate src/calibrate.cpp src/calibration/cam_calib.cpp)
-target_link_libraries(basalt_calibrate basalt ${BASALT_PANGO_TARGETS} basalt::cli11)
+target_link_libraries(basalt_calibrate basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 
 add_executable(basalt_calibrate_imu src/calibrate_imu.cpp src/calibration/cam_imu_calib.cpp)
-target_link_libraries(basalt_calibrate_imu basalt ${BASALT_PANGO_TARGETS} basalt::cli11)
+target_link_libraries(basalt_calibrate_imu basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 
 
 add_executable(basalt_vio_sim src/vio_sim.cpp)
-target_link_libraries(basalt_vio_sim basalt ${BASALT_PANGO_TARGETS} basalt::cli11)
+target_link_libraries(basalt_vio_sim basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 
 add_executable(basalt_mapper_sim src/mapper_sim.cpp)
-target_link_libraries(basalt_mapper_sim basalt ${BASALT_PANGO_TARGETS} basalt::cli11)
+target_link_libraries(basalt_mapper_sim basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 
 # mapper sim native doesn't use template free interface
 if(BASALT_INSTANTIATIONS_DOUBLE)
   add_executable(basalt_mapper_sim_naive src/mapper_sim_naive.cpp)
-  target_link_libraries(basalt_mapper_sim_naive basalt ${BASALT_PANGO_TARGETS} basalt::cli11)
+  target_link_libraries(basalt_mapper_sim_naive basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 endif()
 
 add_executable(basalt_mapper src/mapper.cpp)
-target_link_libraries(basalt_mapper basalt ${BASALT_PANGO_TARGETS} basalt::cli11)
+target_link_libraries(basalt_mapper basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 
 
 add_executable(basalt_opt_flow src/opt_flow.cpp)
-target_link_libraries(basalt_opt_flow basalt ${BASALT_PANGO_TARGETS} basalt::cli11)
+target_link_libraries(basalt_opt_flow basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 
 add_executable(basalt_vio src/vio.cpp)
-target_link_libraries(basalt_vio basalt ${BASALT_PANGO_TARGETS} basalt::cli11 fmt::fmt)
+target_link_libraries(basalt_vio basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11 fmt::fmt)
 
 add_executable(basalt_time_alignment src/time_alignment.cpp)
-target_link_libraries(basalt_time_alignment basalt ${BASALT_PANGO_TARGETS} basalt::cli11)
+target_link_libraries(basalt_time_alignment basalt ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 
 add_executable(basalt_kitti_eval src/kitti_eval.cpp)
-target_link_libraries(basalt_kitti_eval basalt::basalt-headers basalt::cli11)
+target_link_libraries(basalt_kitti_eval basalt::basalt-headers CLI11::CLI11)
 
 find_package(realsense2 QUIET)
 if(realsense2_FOUND)
   add_executable(basalt_rs_t265_record src/rs_t265_record.cpp src/device/rs_t265.cpp)
-  target_link_libraries(basalt_rs_t265_record basalt realsense2::realsense2 ${BASALT_PANGO_TARGETS} basalt::cli11)
+  target_link_libraries(basalt_rs_t265_record basalt realsense2::realsense2 ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 
   add_executable(basalt_rs_t265_vio src/rs_t265_vio.cpp src/device/rs_t265.cpp)
-  target_link_libraries(basalt_rs_t265_vio basalt realsense2::realsense2 ${BASALT_PANGO_TARGETS} basalt::cli11)
+  target_link_libraries(basalt_rs_t265_vio basalt realsense2::realsense2 ${BASALT_PANGO_TARGETS} CLI11::CLI11)
 endif()
 
 
