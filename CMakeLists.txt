@@ -21,16 +21,16 @@ if(LSB_RELEASE_PROGRAM)
     OUTPUT_STRIP_TRAILING_WHITESPACE)
 
   if(${LSB_RELEASE_ID_SHORT} EQUAL "22.04")
-    set(DEBIAN_DEPENDS "libtbb12, liblz4-1, libbz2-1.0, libfmt8, libboost-filesystem1.74.0, libboost-date-time1.74.0, libboost-program-options1.74.0, libboost-regex1.74.0, libopencv-dev, libglew2.2, libjpeg8, libpng16-16, librealsense2, librealsense2-dkms, librealsense2-gl, librealsense2-utils")
+    set(DEBIAN_DEPENDS "libtbb12, liblz4-1, libbz2-1.0, libfmt8, libboost-filesystem1.74.0, libboost-date-time1.74.0, libboost-program-options1.74.0, libboost-regex1.74.0, libopencv-dev, libglew2.2, libjpeg8, libpng16-16")
 
   elseif(${LSB_RELEASE_ID_SHORT} EQUAL "20.04")
-    set(DEBIAN_DEPENDS "libtbb2, liblz4-1, libbz2-1.0, libboost-filesystem1.71.0, libboost-date-time1.71.0, libboost-program-options1.71.0, libboost-regex1.71.0, libopencv-dev, libglew2.1, libjpeg8, libpng16-16, librealsense2, librealsense2-dkms, librealsense2-gl, librealsense2-utils")
+    set(DEBIAN_DEPENDS "libtbb2, liblz4-1, libbz2-1.0, libboost-filesystem1.71.0, libboost-date-time1.71.0, libboost-program-options1.71.0, libboost-regex1.71.0, libopencv-dev, libglew2.1, libjpeg8, libpng16-16")
 
   elseif(${LSB_RELEASE_ID_SHORT} EQUAL "18.04")
-    set(DEBIAN_DEPENDS "libtbb2, liblz4-1, libbz2-1.0, libboost-filesystem1.65.1, libboost-date-time1.65.1, libboost-program-options1.65.1, libboost-regex1.65.1, libopencv-dev, libglew2.0, libjpeg8, libpng16-16, librealsense2, librealsense2-dkms, librealsense2-gl, librealsense2-utils")
+    set(DEBIAN_DEPENDS "libtbb2, liblz4-1, libbz2-1.0, libboost-filesystem1.65.1, libboost-date-time1.65.1, libboost-program-options1.65.1, libboost-regex1.65.1, libopencv-dev, libglew2.0, libjpeg8, libpng16-16")
 
   elseif(${LSB_RELEASE_ID_SHORT} EQUAL "16.04")
-    set(DEBIAN_DEPENDS "libtbb2, liblz4-1, libbz2-1.0, libboost-filesystem1.58.0, libboost-date-time1.58.0, libboost-program-options1.58.0, libboost-regex1.58.0, libopencv-dev, libglew1.13, libjpeg8, libpng12-0, libstdc++6, librealsense2, librealsense2-dkms, librealsense2-gl, librealsense2-utils")
+    set(DEBIAN_DEPENDS "libtbb2, liblz4-1, libbz2-1.0, libboost-filesystem1.58.0, libboost-date-time1.58.0, libboost-program-options1.58.0, libboost-regex1.58.0, libopencv-dev, libglew1.13, libjpeg8, libpng12-0, libstdc++6")
   endif()
 
 endif(LSB_RELEASE_PROGRAM)
@@ -431,16 +431,6 @@ target_link_libraries(basalt_time_alignment basalt ${BASALT_PANGO_TARGETS} CLI11
 add_executable(basalt_kitti_eval src/kitti_eval.cpp)
 target_link_libraries(basalt_kitti_eval basalt::basalt-headers CLI11::CLI11)
 
-find_package(realsense2 QUIET)
-if(realsense2_FOUND)
-  add_executable(basalt_rs_t265_record src/rs_t265_record.cpp src/device/rs_t265.cpp)
-  target_link_libraries(basalt_rs_t265_record basalt realsense2::realsense2 ${BASALT_PANGO_TARGETS} CLI11::CLI11)
-
-  add_executable(basalt_rs_t265_vio src/rs_t265_vio.cpp src/device/rs_t265.cpp)
-  target_link_libraries(basalt_rs_t265_vio basalt realsense2::realsense2 ${BASALT_PANGO_TARGETS} CLI11::CLI11)
-endif()
-
-
 
 install(TARGETS basalt_calibrate basalt_calibrate_imu basalt_vio_sim basalt_mapper_sim basalt_mapper basalt_opt_flow basalt_vio basalt_kitti_eval basalt_time_alignment basalt basalt-headers
   EXPORT BasaltTargets
@@ -456,14 +446,6 @@ if(BASALT_INSTANTIATIONS_DOUBLE)
     RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
     LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
     ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
-endif()
-
-if(realsense2_FOUND)
-    install(TARGETS basalt_rs_t265_record basalt_rs_t265_vio
-      EXPORT BasaltTargets
-      RUNTIME DESTINATION ${CMAKE_INSTALL_PREFIX}/bin
-      LIBRARY DESTINATION ${CMAKE_INSTALL_PREFIX}/lib
-      ARCHIVE DESTINATION ${CMAKE_INSTALL_PREFIX}/lib)
 endif()
 
 file(GLOB SCRIPTS_TO_INSTALL "${CMAKE_CURRENT_SOURCE_DIR}/scripts/basalt_*.py")
